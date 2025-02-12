@@ -540,6 +540,7 @@ const capacity = 7;
 
 **MDN Reference:**
 
+- [Classes](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes)
 - [Error Object](https://dev.to/codewithshahmeer/best-practices-for-writing-efficient-javascript-code-160p)
 - [try/catch](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/try...catch)
 
@@ -563,7 +564,7 @@ function validateUser(user) {
 npm install winston  
 ```
 ```javascript
-import winston from 'winston';  
+const winston = require("winston")
 
 const logger = winston.createLogger({  
   level: 'debug',  
@@ -611,3 +612,475 @@ Roses are red, violets are blue.
 ### Challenge (Optional)
 - Add a logger to track file processing time.
 - Write a test with Jest to verify error handling.
+
+## Session 10: Hoisting
+
+Goal: Understand how JavaScript hoists variable and function declarations.
+
+### 1. Definition:
+
+Hoisting is JavaScript's default behavior of moving declarations (variables and functions) to the top of their scope during compilation.
+
+- Variables declared with `var` are hoisted but initialized to `undefined`.
+- `let/const` are hoisted but not initialized (Temporal Dead Zone).
+- Function declarations are fully hoisted (name and body).
+
+** References:**
+
+- [MDN: Hoisting](https://developer.mozilla.org/en-US/docs/Glossary/Hoisting)
+
+### 2. Tutorial:
+
+- Create a file hoisting.js:
+
+```javascript
+console.log(hoistedVar); // Output: undefined
+var hoistedVar = "I'm hoisted!";
+
+notHoistedFunc(); // Error: notHoistedFunc is not a function
+var notHoistedFunc = () => console.log("I won't work");
+
+hoistedFunc(); // Output: "I work!"
+function hoistedFunc() {
+  console.log("I work!");
+}
+```
+
+### 3. Exercise:
+
+Predict and explain in a text file the outputs/errors of the code above.
+
+**Challenge: (Optional)**
+Rewrite the code using let/const and explain the differences.
+
+## Session 11: Classes and Inheritance
+
+Goal: Learn to create classes and implement inheritance.
+
+### 1. Definition:
+
+- Class: A blueprint for creating objects with shared methods/properties.
+- Inheritance: Subclasses inherit properties/methods from a parent class using extends.
+- Use super() to call the parent constructor.
+
+**References:**
+
+- [MDN: Classes](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes)
+
+### 2. Tutorial:
+
+- Create classes.js:
+
+```javascript
+class Animal {
+  constructor(name) {
+    this.name = name;
+  }
+
+  speak() {
+    return `${this.name} makes a noise.`;
+  }
+}
+
+class Dog extends Animal {
+  constructor(name) {
+    super(name); // Call parent constructor
+  }
+
+  speak() {
+    return `${super.speak()} ${this.name} barks!`;
+  }
+}
+
+const dog = new Dog("Rex");
+console.log(dog.speak()); // "Rex makes a noise. Rex barks!"
+```
+
+### 3. Exercise:
+Create a Cat class that overrides speak() to return "Meow!".
+
+**Challenge: (Optional)**
+Add a static method info() to Animal that returns "I am an animal class."
+
+## Session 3: Iterators and Generators
+
+Goal: Master custom iteration and generator functions.
+
+### 1. Definition:
+
+- Iterator: An object with a next() method that returns { value, done }.
+- Generator: A function (function*) that yields values sequentially.
+- Use Symbol.iterator to define custom iteration logic.
+
+**References:**
+
+- [MDN: Iterators](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Iterator)
+- [MDN: Generators](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Generator)
+
+### 2. Tutorial:
+
+Create iterators.js:
+
+```javascript
+// Generator example
+function* countToThree() {
+  yield 1;
+  yield 2;
+  yield 3;
+}
+
+// Custom iterable object
+const customIterable = {
+  [Symbol.iterator]: function* () {
+    yield "a";
+    yield "b";
+  },
+};
+
+// Usage:
+const generator = countToThree();
+console.log(generator.next().value); // 1
+
+for (const item of customIterable) {
+  console.log(item); // "a", "b"
+}
+```
+
+### 3. Exercise:
+Create a generator evenNumbers that yields the first 3 even numbers.
+
+**Challenge:**
+Build a custom iterable range that yields numbers from start to end.
+
+## Session 13: Command Line Interfaces (CLI)
+
+Goal: Build a command-line tool using Node.js with user interaction and configuration.
+
+### 1. Definitions
+
+- CLI: Command-line interface that accepts arguments/flags.
+- Child Processes: Spawning system commands (e.g., child_process module).
+- Configuration Files: Storing user preferences (e.g., .json or .rc files).
+
+**MDN Reference:**
+
+Template Literals (for CLI output
+Process.argv (Node.js context)
+
+### 2. Tutorial
+#### Step 1: Parse Command-Line Arguments
+```javascript
+// Use process.argv  
+const args = process.argv.slice(2);  
+const [command, input] = args;  
+```
+
+#### Step 2: Use chalk for Colored Output
+```bash
+npm install chalk  
+```
+```javascript
+import chalk from 'chalk';  
+console.log(chalk.green('Success!'), chalk.red.bold('Error!'));  
+```
+
+#### Step 3: Save Configuration
+```javascript
+const fs = require('fs');  
+const configPath = './.cli-config.json';  
+fs.writeFileSync(configPath, JSON.stringify({ theme: 'dark' }));  
+```
+
+### 3. Exercise: Password Generator CLI
+
+Build a CLI tool that generates random passwords.
+
+**Requirements:**
+
+- Accept flags: --length (default: 12), --uppercase, --numbers.
+- Save preferences to .pw-config.json.
+- Output password in green.
+
+Sample Command:
+```bash
+node pwgen.js --length 16 --uppercase --numbers  
+```
+
+**Hints:**
+
+- Use process.argv or yargs for argument parsing.
+- Generate passwords with Math.random() and character sets.
+
+
+## Session 14: Modules, Packages & NPM
+
+Goal: Create reusable modules and publish them to npm.
+
+### 1. Definitions
+
+- ES Modules: import/export syntax (vs. CommonJS require).
+- NPM/Yarn: Package Manager
+
+**MDN Reference:**
+
+- [import/export](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import)
+- [Object Exports](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/export)
+
+### 2. Tutorial
+#### Step 1: Create a Module
+```javascript
+// stringUtils.js  
+export function capitalize(str) {  
+  return str.charAt(0).toUpperCase() + str.slice(1);  
+}  
+```
+#### Step 2: Run using NPM
+```bash
+npm init  
+npm install
+npm start
+```
+
+#### 3. Exercise: Math Utility Module
+
+- Create an npm module with math functions (sum, average, median).
+
+**Requirements:**
+
+- Export functions using ES modules.
+- Write JSDoc comments.
+- Publish to npm (or a private registry).
+
+**Hints:**
+
+- Handle edge cases (e.g., empty arrays).
+- Use npm test with Jest (Session 10).
+
+## Session 15: Streams & Buffers
+
+Goal: Process large datasets efficiently using streams and buffers.
+
+### 1. Definitions
+
+- Stream: Sequential data flow (readable, writable, duplex).
+- Buffer: Temporary storage for binary data.
+
+**MDN Reference:**
+
+- [Typed Arrays (Buffer)](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray)
+- [Streams API (Node.js uses its own streams)](https://developer.mozilla.org/en-US/docs/Web/API/Streams_API)
+
+### 2. Tutorial
+#### Step 0: Download a Dataser from Hugging Face
+
+- [Hugging Datasets](https://huggingface.co/datasets)
+
+> [!NOTE]
+> Search for `json` or `csv` for easier comprehension
+
+#### Step 1: Read File with Stream
+```javascript
+// stream.js
+import { createReadStream } from 'fs';  
+const stream = createReadStream('largefile.txt', 'utf-8');  
+stream.on('data', chunk => console.log('Chunk:', chunk.length));  
+```
+
+#### Step 2: Transform Stream
+```javascript
+import { Transform } from 'stream';  
+const uppercaseTransform = new Transform({  
+  transform(chunk, encoding, callback) {  
+    this.push(chunk.toString().toUpperCase());  
+    callback();  
+  }  
+});  
+```
+### 3. Exercise: Log File Analyzer
+
+Process a 1GB log file to count HTTP status codes (200, 404, 500).
+
+**Requirements:**
+
+- Use streams to avoid loading the entire file.
+- Output counts as JSON.
+
+Sample Log Line:
+```log
+2023-10-01 GET /api/users 200  
+```
+
+**Hints:**
+
+- Split lines with \n.
+- Use readline module for line-by-line processing.
+
+## Session 16: Testing & TDD with Jest
+
+Goal: Write tests and adopt test-driven development (TDD).
+
+### 1. Definitions
+
+- Unit Test: Testing individual functions in isolation.
+- Mocking: Simulating external dependencies (e.g., APIs).
+
+**MDN Reference:**
+
+- [Function Mocks (Jest-specific)](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Jest)
+- [Jest](https://jestjs.io/docs/getting-started)
+
+### 2. Tutorial
+#### Step 1: Write a Test
+```javascript
+// sum.test.js  
+import { sum } from './math.js';  
+
+test('adds 1 + 2 to equal 3', () => {  
+  expect(sum(1, 2)).toBe(3);  
+});  
+```
+
+#### Step 2: Mock an API Call
+```javascript
+describe('Date mocking example', () => {
+  // Save the real Date object for later restoration.
+  const RealDate = Date;
+  // Define a fixed date – this will be our "today".
+  const fixedDate = new Date('2025-01-01T00:00:00.000Z');
+
+  beforeAll(() => {
+    // Override the global Date constructor.
+    global.Date = class extends RealDate {
+      constructor(date) {
+        // If a date is passed, call the real constructor.
+        if (date) {
+          return super(date);
+        }
+        // Otherwise, return the fixed date.
+        return fixedDate;
+      }
+    };
+
+    // Also override Date.now() to return the fixed timestamp.
+    Date.now = jest.fn(() => fixedDate.getTime());
+  });
+
+  afterAll(() => {
+    // Restore the original Date constructor and Date.now.
+    global.Date = RealDate;
+    jest.restoreAllMocks();
+  });
+
+  test('new Date() returns the fixed date', () => {
+    const today = new Date();
+    expect(today).toEqual(fixedDate);
+  });
+
+  test('Date.now() returns the fixed timestamp', () => {
+    expect(Date.now()).toEqual(fixedDate.getTime());
+  });
+});
+```
+
+### 3. Exercise: Test a Currency Converter
+
+Write tests for a function that converts USD to EUR using a mock exchange rate API.
+
+**Requirements:**
+
+- Test successful conversion.
+- Test API failure handling.
+
+**Function:**
+```javascript
+export async function convertUSDToEUR(amount) {  
+  const rate = await fetchExchangeRate(); // Assume this calls an API  
+  return amount * rate;  
+}
+```
+
+## Session 17: Hands on Mini Project
+
+Goal: Build a CLI Tool to create a snapshot of you development environment. You should be able to define where your projects folder are and how to define the naming pattern for the snapshot.
+
+### 3. Exercise: Todo API
+
+Build a CLI for a TODO app. Save all interactions on a file
+
+**Requirements:**
+
+- Create TODO
+- Delete TODO
+- Update TODO
+
+**Challenge (Optional)**
+
+- Create a way to prioritize your tasks
+- Add a Description to your tasks
+- PRO: Create Subtasks inside Description
+
+## Sessions 18 and 19: CLI Project
+
+Goal: Build a CLI tool that interacts with a public API (no authentication required) to solve a real-world problem.
+
+### Project Overview
+
+- Choose an API from the Public APIs List and create a CLI tool that interacts with at least one endpoint. The tool should provide meaningful functionality, such as fetching data, processing it, and presenting it in a user-friendly way.
+
+### Project Requirements (20 Points)
+1. API Selection (2 Points)
+    1.1: Choose an API from the Public APIs List that does not require authentication.
+    1.2: Justify your choice in the README.md (e.g., why this API is interesting or useful).
+
+2. CLI Functionality (5 Points)
+    2.1: Fetch data from at least one endpoint of the chosen API.
+    2.2: Process the data (e.g., filter, sort, or transform it).
+    2.3: Display the results in a user-friendly format (e.g., table, JSON, or plain text).
+    2.4: Accept command-line arguments/flags (e.g., --sort, --filter, --output).
+    2.5: Provide a --help flag to display usage instructions.
+
+3. Code Quality (4 Points)
+    3.1: Use ES6+ features (e.g., const, let, arrow functions, destructuring).
+    3.2: Modularize code into reusable functions/classes.
+    3.3: Use a linter (e.g., ESLint) with a standard config (e.g., Airbnb).
+    3.4: Handle errors gracefully (e.g., invalid API responses, network issues).
+
+4. Documentation (3 Points)
+    4.1: Write a detailed README.md with:
+        Installation instructions.
+        Usage examples.
+        API endpoint documentation.
+    4.2: Add JSDoc comments for all functions/classes.
+    4.3: Include a CHANGELOG.md for version history.
+
+5. Testing (3 Points)
+    5.1: Write unit tests for core functionality (e.g., data processing).
+    5.2: Mock API responses for testing (e.g., using nock or jest.mock).
+    5.3: Achieve at least 80% test coverage.
+
+6. Git & Version Control (2 Points)
+    6.1: Use Git for version control with meaningful commit messages.
+    6.2: Tag releases (e.g., v1.0.0) following semantic versioning.
+
+7. Bonus Features (1 Point)
+    7.1: Add a creative feature (e.g., save results to a file, support multiple output formats).
+
+#### Example Project: Weather CLI Tool
+API: OpenWeatherMap (Free tier, no auth required).
+Features
+
+    Fetch current weather for a city.
+    Display temperature, humidity, and weather conditions.
+    Accept a --city flag to specify the location.
+
+Commands
+```bash
+node weather.js --city "New York"  
+```
+Output
+```bash
+🌤️ Weather in New York:  
+- Temperature: 15°C  
+- Humidity: 60%  
+- Conditions: Cloudy  
+```
