@@ -1019,7 +1019,7 @@ Build a CLI for a TODO app. Save all interactions on a file
 
 ## Sessions 18 and 19: CLI Project
 
-Goal: Build a CLI tool that interacts with a public API (no authentication required) to solve a real-world problem.
+Goal: Build a CLI tool that interacts with a public API (no authentication required) defined [here](https://github.com/public-apis/public-apis) to solve a real-world problem.
 
 ### Project Overview
 
