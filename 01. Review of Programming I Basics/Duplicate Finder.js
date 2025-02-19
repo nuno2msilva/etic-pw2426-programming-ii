@@ -1,5 +1,5 @@
 function findDuplicates(arr) {
-    let seenNumbers = new Set(); // Create a Set to keep track of numbers we've already seen
+    let seenNumbers  = new Set(); // Create a Set to keep track of numbers we've already seen
     let duplicates = new Set(); // Create another Set to store duplicate values
     
     for (let num of arr) { // Loop through each number in the input array

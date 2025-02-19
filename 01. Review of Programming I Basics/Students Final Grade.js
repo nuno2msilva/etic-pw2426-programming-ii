@@ -15,7 +15,7 @@ class Student {
     }
 }
 
-// Example usage:
+// Example:
 const student = new Student("Alice");
 student.addGrade(90);
 student.addGrade(85);
