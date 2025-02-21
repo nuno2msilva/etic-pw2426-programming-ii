@@ -847,7 +847,6 @@ npm start
 
 - Export functions using ES modules.
 - Write JSDoc comments.
-- Publish to npm (or a private registry).
 
 **Hints:**
 
@@ -879,20 +878,20 @@ Goal: Process large datasets efficiently using streams and buffers.
 #### Step 1: Read File with Stream
 ```javascript
 // stream.js
-import { createReadStream } from 'fs';  
-const stream = createReadStream('largefile.txt', 'utf-8');  
-stream.on('data', chunk => console.log('Chunk:', chunk.length));  
+import { createReadStream } from 'fs';
+export function start(file) {
+  const stream = createReadStream(file, 'utf-8');  
+  stream.on('data', chunk => console.log('Chunk:', chunk.length));
+}
 ```
 
 #### Step 2: Transform Stream
 ```javascript
-import { Transform } from 'stream';  
-const uppercaseTransform = new Transform({  
-  transform(chunk, encoding, callback) {  
-    this.push(chunk.toString().toUpperCase());  
-    callback();  
-  }  
-});  
+import { start } from 'stream';
+
+console.log("Starting Process...");
+start();
+console.log("Finished!!!");
 ```
 ### 3. Exercise: Log File Analyzer
 
@@ -911,7 +910,7 @@ Sample Log Line:
 **Hints:**
 
 - Split lines with \n.
-- Use readline module for line-by-line processing.
+- Use `readline` module for line-by-line processing.
 
 ## Session 16: Testing & TDD with Jest
 
@@ -928,6 +927,15 @@ Goal: Write tests and adopt test-driven development (TDD).
 - [Jest](https://jestjs.io/docs/getting-started)
 
 ### 2. Tutorial
+#### Step 0: Add Jest script to `package.json`
+```json
+...
+"scripts": {
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
+}
+...
+```
+
 #### Step 1: Write a Test
 ```javascript
 // sum.test.js  
@@ -1038,10 +1046,9 @@ Goal: Build a CLI tool that interacts with a public API (no authentication recom
     2.5: Provide a --help flag to display usage instructions.
 
 3. Code Quality (4 Points)
-    3.1: Use ES6+ features (e.g., const, let, arrow functions, destructuring).
+    3.1: Use ES6+ features (e.g., const, let, arrow functions, destructuring, import/export).
     3.2: Modularize code into reusable functions/classes.
-    3.3: Use a linter (e.g., ESLint) with a standard config (e.g., Airbnb).
-    3.4: Handle errors gracefully (e.g., invalid API responses, network issues).
+    3.3: Handle errors gracefully (e.g., invalid API responses, network issues).
 
 4. Documentation (3 Points)
     4.1: Write a detailed README.md with:
