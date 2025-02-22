@@ -923,7 +923,7 @@ Goal: Write tests and adopt test-driven development (TDD).
 
 **MDN Reference:**
 
-- [Function Mocks (Jest-specific)](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Jest)
+- [Function Mocks (Jest-specific)](https://jestjs.io/docs/mock-functions)
 - [Jest](https://jestjs.io/docs/getting-started)
 
 ### 2. Tutorial
