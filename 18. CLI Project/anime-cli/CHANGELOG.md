@@ -1,7 +1,13 @@
+## First Release [1.0.0]
+- File reestructuring for better reading;
+- Commented scripts detailing their functionality;
+- Confirmed functionality ensuring everything is working due;
+- Created README.md
+
 ## Update and Delete Watchlist Entries [0.9.0]
 - Command to refresh anime data from watchlist (e.g., from “Airing” to “Finished”) via Jikan  
 - Logic for correctly identifying entries needing an update 
-- Ability to remove a watchlist entry by clicking d while navigating list (with confirmation)
+- Ability to remove a watchlist entry by clicking "d" while navigating list (with confirmation)
 - Automatic re-indexing of watchlist after deletion   
 
 ## List Watchlist [0.8.0]

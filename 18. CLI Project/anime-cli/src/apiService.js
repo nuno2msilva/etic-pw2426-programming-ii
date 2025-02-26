@@ -1,21 +1,12 @@
-// animeSearch.js
 import fetch from 'node-fetch';
+import { Anime } from './Anime.js';
 
-// Sacred Anime class
-export class Anime {
-  constructor({ title, genres, episodes, status, duration, broadcastDay, season, studios }) {
-    this.title = title;
-    this.genres = genres;
-    this.episodes = episodes || 'Unknown (Ongoing)'; // Handle null episodes
-    this.status = status;
-    this.duration = duration;
-    this.broadcastDay = broadcastDay || 'Unknown'; // Handle null broadcastDay
-    this.season = season || 'Unknown'; // Handle null season
-    this.studios = studios;
-  }
-}
-
-// Search anime by query, ordered by relevance
+/**
+ * Fetches anime data from the Jikan API based on a search query.
+ * @param {string} query - The search query.
+ * @param {number} offset - The offset for pagination.
+ * @returns {Promise<Anime[]>} - A promise that resolves to an array of Anime instances.
+ */
 export const searchAnime = async (query, offset = 0) => {
   const response = await fetch(
     `https://api.jikan.moe/v4/anime?q=${query}&order_by=title&sort=asc&limit=18&page=${Math.floor(offset / 18) + 1}`
@@ -27,16 +18,21 @@ export const searchAnime = async (query, offset = 0) => {
   return data.data.map((anime) => new Anime({
     title: anime.title,
     genres: anime.genres.map((genre) => genre.name),
-    episodes: anime.episodes || 'Unknown (Ongoing)', // Handle null episodes
+    episodes: anime.episodes,
     status: anime.status,
     duration: anime.duration,
-    broadcastDay: anime.broadcast?.day || 'Unknown', // Handle null broadcastDay
-    season: anime.season && anime.year ? `${anime.season} ${anime.year}` : 'Unknown', // Handle null season
+    broadcastDay: anime.broadcast?.day || 'Unknown',
+    season: anime.season && anime.year ? `${anime.season} ${anime.year}` : 'Unknown',
     studios: anime.studios.map((studio) => studio.name),
   }));
 };
 
-// Search anime by genre (up to 2 genres), ordered by ranking
+/**
+ * Fetches anime data from the Jikan API based on genre(s).
+ * @param {Object[]} genres - The genres to search for.
+ * @param {number} offset - The offset for pagination.
+ * @returns {Promise<Anime[]>} - A promise that resolves to an array of Anime instances.
+ */
 export const searchAnimeByGenre = async (genres, offset = 0) => {
   const genreIds = genres.map((genre) => genre.mal_id).join(',');
   const response = await fetch(
@@ -49,16 +45,19 @@ export const searchAnimeByGenre = async (genres, offset = 0) => {
   return data.data.map((anime) => new Anime({
     title: anime.title,
     genres: anime.genres.map((genre) => genre.name),
-    episodes: anime.episodes || 'Unknown (Ongoing)', // Handle null episodes
+    episodes: anime.episodes,
     status: anime.status,
     duration: anime.duration,
-    broadcastDay: anime.broadcast?.day || 'Unknown', // Handle null broadcastDay
-    season: anime.season && anime.year ? `${anime.season} ${anime.year}` : 'Unknown', // Handle null season
+    broadcastDay: anime.broadcast?.day || 'Unknown',
+    season: anime.season && anime.year ? `${anime.season} ${anime.year}` : 'Unknown',
     studios: anime.studios.map((studio) => studio.name),
   }));
 };
 
-// Fetch all available genres
+/**
+ * Fetches all available genres from the Jikan API.
+ * @returns {Promise<Object[]>} - A promise that resolves to an array of genre objects.
+ */
 export const fetchGenres = async () => {
   const response = await fetch('https://api.jikan.moe/v4/genres/anime');
   if (!response.ok) {
@@ -68,7 +67,11 @@ export const fetchGenres = async () => {
   return data.data;
 };
 
-// Fetch the current anime season, ordered by ranking
+/**
+ * Fetches the current anime season from the Jikan API.
+ * @param {number} offset - The offset for pagination.
+ * @returns {Promise<Anime[]>} - A promise that resolves to an array of Anime instances.
+ */
 export const fetchCurrentSeason = async (offset = 0) => {
   const response = await fetch(
     `https://api.jikan.moe/v4/seasons/now?order_by=score&sort=desc&limit=18&page=${Math.floor(offset / 18) + 1}`
@@ -80,11 +83,11 @@ export const fetchCurrentSeason = async (offset = 0) => {
   return data.data.map((anime) => new Anime({
     title: anime.title,
     genres: anime.genres.map((genre) => genre.name),
-    episodes: anime.episodes || 'Unknown (Ongoing)', // Handle null episodes
+    episodes: anime.episodes,
     status: anime.status,
     duration: anime.duration,
-    broadcastDay: anime.broadcast?.day || 'Unknown', // Handle null broadcastDay
-    season: anime.season && anime.year ? `${anime.season} ${anime.year}` : 'Unknown', // Handle null season
+    broadcastDay: anime.broadcast?.day || 'Unknown',
+    season: anime.season && anime.year ? `${anime.season} ${anime.year}` : 'Unknown',
     studios: anime.studios.map((studio) => studio.name),
   }));
 };

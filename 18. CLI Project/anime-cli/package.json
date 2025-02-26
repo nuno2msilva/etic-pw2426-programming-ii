@@ -1,6 +1,6 @@
 {
   "name": "anime-cli",
-  "version": "0.8.0",
+  "version": "1.0.0",
   "description": "A CLI tool to search for anime and manage a watchlist",
   "main": "bin/index.js",
   "bin": {
@@ -8,7 +8,13 @@
   },
   "scripts": {
     "start": "node bin/cli.js",
-    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "search": "node index.js --name",
+    "genres": "node index.js --genres",
+    "season": "node index.js --season",
+    "watchlist": "node index.js --watchlist",
+    "refresh": "node index.js --refresh",
+    "help":"node index.js --help"
   },
   "type": "module",
   "author": "Nuno Silva <nmsilva164@gmail.com>",

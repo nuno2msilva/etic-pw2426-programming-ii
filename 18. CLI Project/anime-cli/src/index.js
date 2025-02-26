@@ -1,8 +1,11 @@
-import { handleCli } from './cliHandlers.js';
-import process from "node:process";
+import { handleCli } from './cliService.js';
 
-// Get search query from command line argument
-const query = process.argv.slice(2).join(' ');
-
-// Start CLI process
-handleCli(query);
+// Start the CLI process and catch all errors
+(async () => {
+  try {
+    await handleCli();
+  } catch (error) {
+    console.error(`An unexpected error occurred: ${error.message}`);
+    process.exit(1);
+  }
+})();

@@ -1,31 +1,42 @@
-// watchlist.js
 import fs from 'fs';
-import { searchAnime } from './animeSearch.js';
+import { searchAnime } from './apiService.js'; // Import searchAnime
+import { Anime } from './Anime.js';
 
 const WATCHLIST_FILE = 'watchlist.json';
 
-// Create watchlist file if it doesn't exist
+/**
+ * Initializes the watchlist file if it doesn't exist.
+ * @returns {string|null} - A success message if the file was created, otherwise null.
+ */
 const initializeWatchlist = () => {
   if (!fs.existsSync(WATCHLIST_FILE)) {
     fs.writeFileSync(WATCHLIST_FILE, JSON.stringify([], null, 2));
-    return `Created ${WATCHLIST_FILE} successfully.`; // Return success message
+    return `Created ${WATCHLIST_FILE} successfully.`;
   }
-  return null; // No message if file already exists
+  return null;
 };
 
-// Append anime to watchlist
-const addAnimeToWatchlist = (anime) => {
+/**
+ * Adds an anime to the watchlist.
+ * @param {Anime} anime - The anime to add.
+ * @returns {string} - A success message.
+ */
+export const addAnimeToWatchlist = (anime) => {
   const initMessage = initializeWatchlist();
 
   const watchlist = JSON.parse(fs.readFileSync(WATCHLIST_FILE, 'utf-8'));
   watchlist.push(anime);
   fs.writeFileSync(WATCHLIST_FILE, JSON.stringify(watchlist, null, 2));
 
-  return initMessage || `Added "${anime.title}" to watchlist.`; // Return appropriate message
+  return initMessage || `Added "${anime.title}" to watchlist.`;
 };
 
-// Load and validate the watchlist
-const loadWatchlist = () => {
+/**
+ * Loads and validates the watchlist.
+ * @returns {Anime[]} - An array of Anime instances.
+ * @throws {Error} - If the watchlist file is empty or malformed.
+ */
+export const loadWatchlist = () => {
   if (!fs.existsSync(WATCHLIST_FILE)) {
     throw new Error('Watchlist file does not exist. Use the --watchlist flag after adding anime.');
   }
@@ -46,8 +57,11 @@ const loadWatchlist = () => {
   }
 };
 
-// Refresh anime data in the watchlist
-const refreshWatchlist = async () => {
+/**
+ * Refreshes the watchlist by updating anime data from the Jikan API.
+ * @returns {Promise<string>} - A success message.
+ */
+export const refreshWatchlist = async () => {
   const watchlist = loadWatchlist();
   const updatedWatchlist = [];
 
@@ -69,8 +83,12 @@ const refreshWatchlist = async () => {
   return 'Watchlist refreshed successfully.';
 };
 
-// Remove an anime from the watchlist
-const removeAnimeFromWatchlist = (index) => {
+/**
+ * Removes an anime from the watchlist.
+ * @param {number} index - The index of the anime to remove.
+ * @returns {string} - A success message.
+ */
+export const removeAnimeFromWatchlist = (index) => {
   const watchlist = loadWatchlist();
   if (index < 0 || index >= watchlist.length) {
     throw new Error('Invalid index. Anime not found in watchlist.');
@@ -80,5 +98,3 @@ const removeAnimeFromWatchlist = (index) => {
   fs.writeFileSync(WATCHLIST_FILE, JSON.stringify(watchlist, null, 2));
   return `Removed "${removedAnime.title}" from watchlist.`;
 };
-
-export { initializeWatchlist, addAnimeToWatchlist, loadWatchlist, refreshWatchlist, removeAnimeFromWatchlist };

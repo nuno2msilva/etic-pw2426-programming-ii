@@ -1,17 +1,17 @@
-// cliHandlers.js
-import { searchAnime, searchAnimeByGenre, fetchGenres, fetchCurrentSeason } from './animeSearch.js';
-import { handleError } from './utils.js';
-import { addAnimeToWatchlist, loadWatchlist, refreshWatchlist, removeAnimeFromWatchlist } from './watchlist.js';
 import readline from 'readline';
+import { Anime } from './Anime.js';
+import { searchAnime, searchAnimeByGenre, fetchGenres, fetchCurrentSeason } from './apiService.js';
+import { addAnimeToWatchlist, loadWatchlist, refreshWatchlist, removeAnimeFromWatchlist } from './watchlistService.js';
+import { handleError } from './errorHandler.js';
 
 // Constants
 const RESULTS_PER_PAGE = 9;
-const FETCH_CHUNK_SIZE = 18; // Fetch 18 results at a time (2 pages of 9)
-const MAX_RESULTS = 81; // Limit to 81 results (9 pages of 9)
+const FETCH_CHUNK_SIZE = 18;
+const MAX_RESULTS = 81;
 
 // Display anime results for a specific page
 const displayPage = (animeInstances, page, totalPages) => {
-  console.clear(); // Clear the console for a clean display
+  console.clear();
   console.log(`Page ${page + 1} of ${totalPages}\n`);
 
   const start = page * RESULTS_PER_PAGE;
@@ -25,18 +25,17 @@ const displayPage = (animeInstances, page, totalPages) => {
 
 // Display detailed anime information for search results
 const displayAnimeInfoForSearch = (anime, animeInstances, currentPage, totalPages, fetchMore) => {
-  console.clear(); // Clear the console for a clean display
+  console.clear();
   console.log(`Name: ${anime.title}`);
   console.log(`Genres: ${anime.genres.join(', ')}`);
-  console.log(`Episodes: ${anime.episodes || 'Unknown (Ongoing)'}`); // Handle null episodes
+  console.log(`Episodes: ${anime.episodes || 'Unknown (Ongoing)'}`);
   console.log(`Status: ${anime.status}`);
   console.log(`Duration: ${anime.duration}`);
-  console.log(`Broadcast Day: ${anime.broadcastDay || 'Unknown'}`); // Handle null broadcastDay
-  console.log(`Season: ${anime.season || 'Unknown'}`); // Handle null season
+  console.log(`Broadcast Day: ${anime.broadcastDay || 'Unknown'}`);
+  console.log(`Season: ${anime.season || 'Unknown'}`);
   console.log(`Studios: ${anime.studios.join(', ')}`);
   console.log('\nAdd this anime to your watchlist? (y/n/q)');
 
-  // Set up keyboard input
   readline.emitKeypressEvents(process.stdin);
   process.stdin.setRawMode(true);
 
@@ -48,137 +47,117 @@ const displayAnimeInfoForSearch = (anime, animeInstances, currentPage, totalPage
     } else if (key.name === 'n') {
       console.log('Returning to the list...');
     } else if (key.name === 'q') {
-      console.log('\nExiting...');
       process.exit(0);
     }
-
-    // Return to the list after handling the keypress
     displayPage(animeInstances, currentPage, totalPages);
   });
 };
 
-// Display detailed anime information for watchlist
+// Display detailed anime information for watchlist entries
 const displayAnimeInfoForWatchlist = (anime, watchlist, currentIndex) => {
-  console.clear(); // Clear the console for a clean display
+  console.clear();
   console.log(`Name: ${anime.title}`);
   console.log(`Genres: ${anime.genres.join(', ')}`);
-  console.log(`Episodes: ${anime.episodes || 'Unknown (Ongoing)'}`); // Handle null episodes
+  console.log(`Episodes: ${anime.episodes || 'Unknown (Ongoing)'}`);
   console.log(`Status: ${anime.status}`);
   console.log(`Duration: ${anime.duration}`);
-  console.log(`Broadcast Day: ${anime.broadcastDay || 'Unknown'}`); // Handle null broadcastDay
-  console.log(`Season: ${anime.season || 'Unknown'}`); // Handle null season
+  console.log(`Broadcast Day: ${anime.broadcastDay || 'Unknown'}`);
+  console.log(`Season: ${anime.season || 'Unknown'}`);
   console.log(`Studios: ${anime.studios.join(', ')}`);
   console.log('\nUse ← and → to navigate, "d" to delete, or "q" to quit.');
 
-  // Set up keyboard input
+  process.stdin.removeAllListeners('keypress');
   readline.emitKeypressEvents(process.stdin);
   process.stdin.setRawMode(true);
 
-  process.stdin.once('keypress', (str, key) => {
-    if (key.name === 'q') {
-      console.log('\nExiting...');
-      process.exit(0);
-    }
+  const onKeyPress = (str, key) => {
+    if (key.name === 'q') process.exit(0);
 
-    // Navigate to the previous anime
+    // Navigation
     if (key.name === 'left' && currentIndex > 0) {
       currentIndex--;
       displayAnimeInfoForWatchlist(watchlist[currentIndex], watchlist, currentIndex);
     }
-
-    // Navigate to the next anime
     if (key.name === 'right' && currentIndex < watchlist.length - 1) {
       currentIndex++;
       displayAnimeInfoForWatchlist(watchlist[currentIndex], watchlist, currentIndex);
     }
 
-    // Delete the current anime
+    // Delete handling
     if (key.name === 'd') {
+      process.stdin.off('keypress', onKeyPress);
       console.log('\nAre you sure you want to delete this anime? (y/n)');
+      
       process.stdin.once('keypress', (confirmStr, confirmKey) => {
         if (confirmKey.name === 'y') {
-          const message = removeAnimeFromWatchlist(currentIndex); // Remove anime
-          console.log(message);
-
-          // Reload the watchlist and adjust the current index
-          watchlist = loadWatchlist();
-          if (watchlist.length === 0) {
-            console.log('Watchlist is now empty. Exiting...');
-            process.exit(0);
+          try {
+            const message = removeAnimeFromWatchlist(currentIndex);
+            console.log(message);
+            
+            const updatedWatchlist = loadWatchlist();
+            if (updatedWatchlist.length === 0) {
+              console.log('Watchlist is now empty. Exiting...');
+              process.exit(0);
+            }
+            
+            const newIndex = currentIndex >= updatedWatchlist.length 
+              ? updatedWatchlist.length - 1 
+              : currentIndex;
+            displayAnimeInfoForWatchlist(updatedWatchlist[newIndex], updatedWatchlist, newIndex);
+          } catch (error) {
+            console.error(handleError(error));
+            process.exit(1);
           }
-
-          if (currentIndex >= watchlist.length) {
-            currentIndex = watchlist.length - 1; // Adjust index if last anime was deleted
-          }
-
-          displayAnimeInfoForWatchlist(watchlist[currentIndex], watchlist, currentIndex); // Display updated anime
         } else {
-          displayAnimeInfoForWatchlist(watchlist[currentIndex], watchlist, currentIndex); // Return to anime details
+          process.stdin.on('keypress', onKeyPress);
+          displayAnimeInfoForWatchlist(watchlist[currentIndex], watchlist, currentIndex);
         }
       });
     }
-  });
+  };
+
+  process.stdin.on('keypress', onKeyPress);
 };
 
-// Handle keyboard input for pagination and anime info (for search results)
+// Handle keyboard input for pagination
 const setupKeyboardNavigationForSearch = (animeInstances, totalPages, fetchMore) => {
   let currentPage = 0;
 
-  // Display the first page
   displayPage(animeInstances, currentPage, totalPages);
 
-  // Set up keyboard input
   readline.emitKeypressEvents(process.stdin);
   process.stdin.setRawMode(true);
 
   process.stdin.on('keypress', async (str, key) => {
-    if (key.name === 'q') {
-      console.log('\nExiting...');
-      process.exit(0);
-    }
+    if (key.name === 'q') process.exit(0);
 
-    // Navigate pages (only if there are multiple pages)
     if (totalPages > 1) {
       if (key.name === 'right' && currentPage < totalPages - 1) {
         currentPage++;
         displayPage(animeInstances, currentPage, totalPages);
       }
-
       if (key.name === 'left' && currentPage > 0) {
         currentPage--;
         displayPage(animeInstances, currentPage, totalPages);
       }
     }
 
-    // Load more results if at the end of the current list and there are 9 or more results
-    if (
-      key.name === 'right' &&
-      currentPage === totalPages - 1 &&
-      fetchMore &&
-      animeInstances.length >= RESULTS_PER_PAGE
-    ) {
-      if (animeInstances.length >= MAX_RESULTS) {
-        console.log('\nNo more results available.');
-        return;
-      }
-
+    if (key.name === 'right' &&
+        currentPage === totalPages - 1 &&
+        fetchMore &&
+        animeInstances.length >= RESULTS_PER_PAGE &&
+        animeInstances.length < MAX_RESULTS) {
       const newAnimeInstances = await fetchMore(animeInstances.length);
       if (newAnimeInstances.length > 0) {
         animeInstances.push(...newAnimeInstances);
-
-        // Enforce the hard limit of 81 results
         if (animeInstances.length > MAX_RESULTS) {
           animeInstances = animeInstances.slice(0, MAX_RESULTS);
         }
-
         totalPages = Math.ceil(animeInstances.length / RESULTS_PER_PAGE);
-        displayPage(animeInstances, currentPage, totalPages); // Stay on the same page
-      } else {
-        console.log('\nNo more results available.');
+        displayPage(animeInstances, currentPage, totalPages);
       }
     }
 
-    // Open anime info if a number key is pressed
     if (key.name && /^[1-9]$/.test(key.name)) {
       const index = currentPage * RESULTS_PER_PAGE + (parseInt(key.name) - 1);
       if (index < animeInstances.length) {
@@ -188,8 +167,8 @@ const setupKeyboardNavigationForSearch = (animeInstances, totalPages, fetchMore)
   });
 };
 
-// Display all available genres as a comma-separated list
-const displayGenres = async () => {
+// Display all available genres
+export const displayGenres = async () => {
   try {
     const genres = await fetchGenres();
     const genreNames = genres.map((genre) => genre.name).join(', ');
@@ -199,15 +178,14 @@ const displayGenres = async () => {
   }
 };
 
-// Display the current anime season, ordered by ranking
-const displayCurrentSeason = async () => {
+// Display current season
+export const displayCurrentSeason = async () => {
   try {
     let animeInstances = await fetchCurrentSeason();
     if (animeInstances.length === 0) {
       throw new Error('No results found for the current season.');
     }
 
-    // Enforce the hard limit of 81 results
     if (animeInstances.length > MAX_RESULTS) {
       animeInstances = animeInstances.slice(0, MAX_RESULTS);
     }
@@ -224,17 +202,15 @@ const displayCurrentSeason = async () => {
   }
 };
 
-// Display the watchlist and navigate through details
-const displayWatchlist = async () => {
+// Display watchlist
+export const displayWatchlist = async () => {
   try {
-    let watchlist = loadWatchlist(); // Load and validate the watchlist
+    let watchlist = loadWatchlist();
     if (watchlist.length === 0) {
       throw new Error('Watchlist is empty. Add anime to the watchlist first.');
     }
 
     let currentIndex = 0;
-
-    // Display the first anime's details
     displayAnimeInfoForWatchlist(watchlist[currentIndex], watchlist, currentIndex);
   } catch (error) {
     console.error(handleError(error));
@@ -242,48 +218,60 @@ const displayWatchlist = async () => {
   }
 };
 
-// Parse command-line arguments manually
-const parseArgs = () => {
+// Help information
+const displayHelp = () => {
+  console.log(`
+Usage: node index.js [options]
+
+Options:
+  name <anime-name>       Search for anime by name
+  genres <genre1/genre2>  Search by genre(s) (max 2)
+  season                  Show current season
+  watchlist               Manage your watchlist
+  refresh                 Refresh watchlist data
+  help                    Show this help message
+
+Examples:
+  node index.js name Attack on Titan
+  node index.js genres "Action/Drama"
+  node index.js season
+  node index.js watchlist
+  node index.js refresh
+  `);
+};
+
+// Argument parser
+export const parseArgs = () => {
   const args = process.argv.slice(2);
   const parsedArgs = {};
 
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--genres') {
-      // Treat everything after --genres as part of the genre list
       const genreList = [];
       i += 1;
-
-      // Collect all arguments until the next flag or end of args
       while (i < args.length && !args[i].startsWith('--')) {
         genreList.push(args[i]);
         i += 1;
       }
-
       if (genreList.length === 0) {
-        parsedArgs.genres = true; // Flag to display all genres
+        parsedArgs.genres = true;
       } else {
-        // Join the genre list with spaces and split by "/"
-        const genres = genreList.join(' ').split('/').map((genre) => genre.trim());
-
-        // Limit to 2 genres
-        if (genres.length > 2) {
-          throw new Error('Please provide up to 2 genres separated by "/".');
-        }
-
+        const genres = genreList.join(' ').split('/').map(g => g.trim());
+        if (genres.length > 2) throw new Error('Maximum 2 genres allowed');
         parsedArgs.genres = genres;
       }
-
-      // Adjust the index to account for the loop increment
       i -= 1;
-    } else if (args[i] === '--season') {
+    } else if (args[i] === 'season') {
       parsedArgs.season = true;
-    } else if (args[i] === '--name') {
+    } else if (args[i] === 'name') {
       parsedArgs.name = args.slice(i + 1).join(' ');
-      break; // Stop parsing after --name
-    } else if (args[i] === '--watchlist') {
+      break;
+    } else if (args[i] === 'watchlist') {
       parsedArgs.watchlist = true;
-    } else if (args[i] === '--refresh') {
+    } else if (args[i] === 'refresh') {
       parsedArgs.refresh = true;
+    } else if (args[i] === 'help') {
+      parsedArgs.help = true;
     }
   }
 
@@ -295,47 +283,43 @@ export const handleCli = async () => {
   try {
     const args = parseArgs();
 
-    // Check if the user wants to refresh the watchlist
+    if (args.help) {
+      displayHelp();
+      return;
+    }
+
     if (args.refresh) {
       const message = await refreshWatchlist();
       console.log(message);
       return;
     }
 
-    // Check if the user wants to display the watchlist
     if (args.watchlist) {
       await displayWatchlist();
-      return; // Don't exit, let navigation handle it
+      return;
     }
 
-    // Check if the user wants to display the current season
     if (args.season) {
       await displayCurrentSeason();
-      return; // Don't exit, let pagination handle it
+      return;
     }
 
-    // Check if the user wants to display genres or search by genre
     if (args.genres) {
       if (args.genres === true) {
-        // Display all genres
         await displayGenres();
       } else {
-        // Search by genre(s)
         const genres = await fetchGenres();
-        const selectedGenres = args.genres.map((genreName) => {
-          const genre = genres.find((g) => g.name.toLowerCase() === genreName.toLowerCase());
-          if (!genre) {
-            throw new Error(`Invalid genre: "${genreName}". Use --genres to see available genres.`);
-          }
+        const selectedGenres = args.genres.map(genreName => {
+          const genre = genres.find(g => g.name.toLowerCase() === genreName.toLowerCase());
+          if (!genre) throw new Error(`Invalid genre: "${genreName}"`);
           return genre;
         });
 
         let animeInstances = await searchAnimeByGenre(selectedGenres);
         if (animeInstances.length === 0) {
-          throw new Error(`No results found for the genre(s): ${args.genres.join('/')}.`);
+          throw new Error(`No results for: ${args.genres.join('/')}`);
         }
 
-        // Enforce the hard limit of 81 results
         if (animeInstances.length > MAX_RESULTS) {
           animeInstances = animeInstances.slice(0, MAX_RESULTS);
         }
@@ -348,16 +332,15 @@ export const handleCli = async () => {
         const totalPages = Math.ceil(animeInstances.length / RESULTS_PER_PAGE);
         setupKeyboardNavigationForSearch(animeInstances, totalPages, fetchMore);
       }
-      return; // Don't exit, let pagination handle it
+      return;
     }
-    // Check if the user wants to search by name
-    else if (args.name) {
+
+    if (args.name) {
       let animeInstances = await searchAnime(args.name);
       if (animeInstances.length === 0) {
-        throw new Error('No results found for the specified query.');
+        throw new Error('No results found');
       }
 
-      // Enforce the hard limit of 81 results
       if (animeInstances.length > MAX_RESULTS) {
         animeInstances = animeInstances.slice(0, MAX_RESULTS);
       }
@@ -369,10 +352,8 @@ export const handleCli = async () => {
 
       const totalPages = Math.ceil(animeInstances.length / RESULTS_PER_PAGE);
       setupKeyboardNavigationForSearch(animeInstances, totalPages, fetchMore);
-    }
-    // No valid flag provided
-    else {
-      throw new Error('Usage: node index.js --name <anime-name> or --genres <genre1/genre2> or --season or --watchlist or --refresh');
+    } else {
+      displayHelp();
     }
   } catch (error) {
     console.error(handleError(error));
