@@ -1,0 +1,19 @@
+{
+  "name": "anime_search",
+  "version": "0.1.0",
+  "description": "A tool that allows user search for anime by name, genre and ranking, featuring a watching list.",
+  "main": "src/cli.js",
+  "scripts": {
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "start": "node src/main.js"
+  },
+  "keywords": [
+    "cli",
+    "tool",
+    "project",
+    "educational",
+    "anime"
+  ],
+  "author": "Nuno Silva <nmsilva164@gmail.com>",
+  "license": "MIT"
+}
