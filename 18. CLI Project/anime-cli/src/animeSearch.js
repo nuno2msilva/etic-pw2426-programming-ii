@@ -3,12 +3,15 @@ import fetch from 'node-fetch';
 
 // Sacred Anime class
 export class Anime {
-  constructor({ title, type, episodes, score, synopsis }) {
+  constructor({ title, genres, episodes, status, duration, broadcastDay, season, studios }) {
     this.title = title;
-    this.type = type;
+    this.genres = genres;
     this.episodes = episodes;
-    this.score = score;
-    this.synopsis = synopsis;
+    this.status = status;
+    this.duration = duration;
+    this.broadcastDay = broadcastDay;
+    this.season = season;
+    this.studios = studios;
   }
 }
 
@@ -23,10 +26,13 @@ export const searchAnime = async (query, offset = 0) => {
   const data = await response.json();
   return data.data.map((anime) => new Anime({
     title: anime.title,
-    type: anime.type,
+    genres: anime.genres.map((genre) => genre.name),
     episodes: anime.episodes,
-    score: anime.score,
-    synopsis: anime.synopsis,
+    status: anime.status,
+    duration: anime.duration,
+    broadcastDay: anime.broadcast?.day || 'Unknown',
+    season: `${anime.season} ${anime.year}`,
+    studios: anime.studios.map((studio) => studio.name),
   }));
 };
 
@@ -42,10 +48,13 @@ export const searchAnimeByGenre = async (genres, offset = 0) => {
   const data = await response.json();
   return data.data.map((anime) => new Anime({
     title: anime.title,
-    type: anime.type,
+    genres: anime.genres.map((genre) => genre.name),
     episodes: anime.episodes,
-    score: anime.score,
-    synopsis: anime.synopsis,
+    status: anime.status,
+    duration: anime.duration,
+    broadcastDay: anime.broadcast?.day || 'Unknown',
+    season: `${anime.season} ${anime.year}`,
+    studios: anime.studios.map((studio) => studio.name),
   }));
 };
 
@@ -70,9 +79,12 @@ export const fetchCurrentSeason = async (offset = 0) => {
   const data = await response.json();
   return data.data.map((anime) => new Anime({
     title: anime.title,
-    type: anime.type,
+    genres: anime.genres.map((genre) => genre.name),
     episodes: anime.episodes,
-    score: anime.score,
-    synopsis: anime.synopsis,
+    status: anime.status,
+    duration: anime.duration,
+    broadcastDay: anime.broadcast?.day || 'Unknown',
+    season: `${anime.season} ${anime.year}`,
+    studios: anime.studios.map((studio) => studio.name),
   }));
 };

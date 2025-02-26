@@ -1,3 +1,7 @@
+## See Anime Info [0.6.0]
+- Displays anime info when pressing the number in the keyboard corresponding to the number;
+- Beautified the numbers
+
 ## Search by Season [0.5.0]
 - Command to retrieve and display the current anime season;
 - Steamlined commands to avoid confusion: "--name <name>", "--genres", "--genres <genre1/genre2>, "--season";

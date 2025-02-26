@@ -16,13 +16,27 @@ const displayPage = (animeInstances, page, totalPages) => {
   const start = page * RESULTS_PER_PAGE;
   const end = start + RESULTS_PER_PAGE;
   animeInstances.slice(start, end).forEach((anime, index) => {
-    console.log(`${index + 1}. ${anime.title}`);
+    console.log(`(${index + 1}) ${anime.title}`);
   });
 
-  console.log('\nUse ← and → to navigate, or press "q" to quit.');
+  console.log('\nUse ← and → to navigate, 1-9 to open info of listed anime, or press "q" to quit.');
 };
 
-// Handle keyboard input for pagination
+// Display detailed anime information
+const displayAnimeInfo = (anime) => {
+  console.clear(); // Clear the console for a clean display
+  console.log(`Name: ${anime.title}`);
+  console.log(`Genres: ${anime.genres.join(', ')}`);
+  console.log(`Episodes: ${anime.episodes}`);
+  console.log(`Status: ${anime.status}`);
+  console.log(`Duration: ${anime.duration}`);
+  console.log(`Broadcast Day: ${anime.broadcastDay}`);
+  console.log(`Season: ${anime.season}`);
+  console.log(`Studios: ${anime.studios.join(', ')}`);
+  console.log('\nPress any key to return to the list.');
+};
+
+// Handle keyboard input for pagination and anime info
 const setupKeyboardNavigation = (animeInstances, totalPages, fetchMore) => {
   let currentPage = 0;
 
@@ -39,6 +53,7 @@ const setupKeyboardNavigation = (animeInstances, totalPages, fetchMore) => {
       process.exit(0);
     }
 
+    // Navigate pages
     if (key.name === 'right' && currentPage < totalPages - 1) {
       currentPage++;
       displayPage(animeInstances, currentPage, totalPages);
@@ -69,6 +84,19 @@ const setupKeyboardNavigation = (animeInstances, totalPages, fetchMore) => {
         displayPage(animeInstances, currentPage, totalPages); // Stay on the same page
       } else {
         console.log('\nNo more results available.');
+      }
+    }
+
+    // Open anime info if a number key is pressed
+    if (key.name && /^[1-9]$/.test(key.name)) {
+      const index = currentPage * RESULTS_PER_PAGE + (parseInt(key.name) - 1);
+      if (index < animeInstances.length) {
+        displayAnimeInfo(animeInstances[index]);
+
+        // Wait for any key to return to the list
+        process.stdin.once('keypress', () => {
+          displayPage(animeInstances, currentPage, totalPages);
+        });
       }
     }
   });
