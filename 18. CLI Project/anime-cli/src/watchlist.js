@@ -24,4 +24,26 @@ const addAnimeToWatchlist = (anime) => {
   return initMessage || `Added "${anime.title}" to watchlist.`; // Return appropriate message
 };
 
-export { initializeWatchlist, addAnimeToWatchlist };
+// Load and validate the watchlist
+const loadWatchlist = () => {
+  if (!fs.existsSync(WATCHLIST_FILE)) {
+    throw new Error('Watchlist file does not exist. Use the --watchlist flag after adding anime.');
+  }
+
+  const watchlistData = fs.readFileSync(WATCHLIST_FILE, 'utf-8');
+  if (!watchlistData.trim()) {
+    throw new Error('Watchlist file is empty. Add anime to the watchlist first.');
+  }
+
+  try {
+    const watchlist = JSON.parse(watchlistData);
+    if (!Array.isArray(watchlist)) {
+      throw new Error('Watchlist file is malformed. Expected an array of anime.');
+    }
+    return watchlist;
+  } catch (error) {
+    throw new Error('Watchlist file is malformed. Invalid JSON format.');
+  }
+};
+
+export { initializeWatchlist, addAnimeToWatchlist, loadWatchlist };

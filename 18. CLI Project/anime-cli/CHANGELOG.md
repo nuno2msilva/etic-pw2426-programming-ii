@@ -1,4 +1,8 @@
-## 0.7.0 – Add Anime to Watchlist
+## List Watchlist [0.8.0]
+- Feature to list watchlist anime one entry at a time, using directional keys to control.
+- Error handling for empty or malformed watchlist files.
+
+## Add Anime to Watchlist [0.7.0]
 - Ability to create a watchlist file if it doesn’t exist;
 - Option to append selected anime details to the watchlist (in pretty print);
 - Fixed pagination misbehavior;

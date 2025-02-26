@@ -1,6 +1,6 @@
 {
   "name": "anime-cli",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "A CLI tool to search for anime and manage a watchlist",
   "main": "bin/index.js",
   "bin": {
