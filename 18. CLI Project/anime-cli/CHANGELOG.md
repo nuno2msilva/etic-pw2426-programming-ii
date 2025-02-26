@@ -1,3 +1,8 @@
+## Search by Genre [0.4.0]
+- CLI option to search anime by genre (up to two), ordered by ranking
+- CLI option to display all available genres
+
+
 ## Paginated Results [0.3.0]
 - Buffer/stream display showing 9 results per page  
 - Navigation with number keys and keyboard arrows, 'q' to quit at any moment
