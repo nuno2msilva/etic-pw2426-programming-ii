@@ -1,0 +1,16 @@
+{
+  "name": "anime-cli",
+  "version": "0.1.0",
+  "description": "A CLI tool to search for anime and manage a watchlist",
+  "main": "bin/index.js",
+  "bin": {
+    "anime": "./bin/cli.js"
+  },
+  "scripts": {
+    "start": "node bin/cli.js",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
+  },
+  "type": "module",
+  "author": "Nuno Silva <nmsilva164@gmail.com>",
+  "license": "MIT"
+}
