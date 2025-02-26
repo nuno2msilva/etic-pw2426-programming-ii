@@ -1,4 +1,8 @@
-##  Search by Name [0.2.0] 
+## Paginated Results [0.3.0]
+- Buffer/stream display showing 9 results per page  
+- Navigation with number keys and keyboard arrows, 'q' to quit at any moment
+
+## Search by Name [0.2.0] 
 - Core logic to query the Jikan API by anime name  
 - Basic CLI prompts to handle search terms
 - Installed node_modules
