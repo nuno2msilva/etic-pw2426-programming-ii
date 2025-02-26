@@ -10,16 +10,13 @@ export class Anime {
     this.score = score;
     this.synopsis = synopsis;
   }
-
-  // Optional: Display anime details
-  display() {
-    return `${this.title} (${this.type}) - Score: ${this.score}`;
-  }
 }
 
-// Search anime by query
-export const searchAnime = async (query) => {
-  const response = await fetch(`https://api.jikan.moe/v4/anime?q=${query}&limit=25`);
+// Search anime by query, ordered by relevance
+export const searchAnime = async (query, offset = 0) => {
+  const response = await fetch(
+    `https://api.jikan.moe/v4/anime?q=${query}&order_by=title&sort=asc&limit=18&page=${Math.floor(offset / 18) + 1}`
+  );
   if (!response.ok) {
     throw new Error(`HTTP error! status: ${response.status}`);
   }
@@ -33,10 +30,12 @@ export const searchAnime = async (query) => {
   }));
 };
 
-// Search anime by genre (up to 3 genres)
-export const searchAnimeByGenre = async (genres) => {
-  const genreIds = genres.map((genre) => genre.id).join(',');
-  const response = await fetch(`https://api.jikan.moe/v4/anime?genres=${genreIds}&order_by=score&sort=desc&limit=25`);
+// Search anime by genre (up to 2 genres), ordered by ranking
+export const searchAnimeByGenre = async (genres, offset = 0) => {
+  const genreIds = genres.map((genre) => genre.mal_id).join(',');
+  const response = await fetch(
+    `https://api.jikan.moe/v4/anime?genres=${genreIds}&order_by=score&sort=desc&limit=18&page=${Math.floor(offset / 18) + 1}`
+  );
   if (!response.ok) {
     throw new Error(`HTTP error! status: ${response.status}`);
   }
@@ -58,4 +57,22 @@ export const fetchGenres = async () => {
   }
   const data = await response.json();
   return data.data;
+};
+
+// Fetch the current anime season, ordered by ranking
+export const fetchCurrentSeason = async (offset = 0) => {
+  const response = await fetch(
+    `https://api.jikan.moe/v4/seasons/now?order_by=score&sort=desc&limit=18&page=${Math.floor(offset / 18) + 1}`
+  );
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+  const data = await response.json();
+  return data.data.map((anime) => new Anime({
+    title: anime.title,
+    type: anime.type,
+    episodes: anime.episodes,
+    score: anime.score,
+    synopsis: anime.synopsis,
+  }));
 };

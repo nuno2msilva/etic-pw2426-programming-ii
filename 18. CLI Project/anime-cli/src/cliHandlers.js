@@ -1,10 +1,12 @@
 // cliHandlers.js
-import { searchAnime, searchAnimeByGenre, fetchGenres } from './animeSearch.js';
+import { searchAnime, searchAnimeByGenre, fetchGenres, fetchCurrentSeason } from './animeSearch.js';
 import { handleError } from './utils.js';
 import readline from 'readline';
 
 // Constants
 const RESULTS_PER_PAGE = 9;
+const FETCH_CHUNK_SIZE = 18; // Fetch 18 results at a time (2 pages of 9)
+const MAX_RESULTS = 81; // Limit to 81 results (9 pages of 9)
 
 // Display anime results for a specific page
 const displayPage = (animeInstances, page, totalPages) => {
@@ -14,14 +16,14 @@ const displayPage = (animeInstances, page, totalPages) => {
   const start = page * RESULTS_PER_PAGE;
   const end = start + RESULTS_PER_PAGE;
   animeInstances.slice(start, end).forEach((anime, index) => {
-    console.log(`${index + 1}. ${anime.title} - Score: ${anime.score}`);
+    console.log(`${index + 1}. ${anime.title}`);
   });
 
   console.log('\nUse ← and → to navigate, or press "q" to quit.');
 };
 
 // Handle keyboard input for pagination
-const setupKeyboardNavigation = (animeInstances, totalPages) => {
+const setupKeyboardNavigation = (animeInstances, totalPages, fetchMore) => {
   let currentPage = 0;
 
   // Display the first page
@@ -31,7 +33,7 @@ const setupKeyboardNavigation = (animeInstances, totalPages) => {
   readline.emitKeypressEvents(process.stdin);
   process.stdin.setRawMode(true);
 
-  process.stdin.on('keypress', (str, key) => {
+  process.stdin.on('keypress', async (str, key) => {
     if (key.name === 'q') {
       console.log('\nExiting...');
       process.exit(0);
@@ -46,6 +48,29 @@ const setupKeyboardNavigation = (animeInstances, totalPages) => {
       currentPage--;
       displayPage(animeInstances, currentPage, totalPages);
     }
+
+    // Load more results if at the end of the current list
+    if (key.name === 'right' && currentPage === totalPages - 1 && fetchMore) {
+      if (animeInstances.length >= MAX_RESULTS) {
+        console.log('\nNo more results available.');
+        return;
+      }
+
+      const newAnimeInstances = await fetchMore(animeInstances.length);
+      if (newAnimeInstances.length > 0) {
+        animeInstances.push(...newAnimeInstances);
+
+        // Enforce the hard limit of 81 results
+        if (animeInstances.length > MAX_RESULTS) {
+          animeInstances = animeInstances.slice(0, MAX_RESULTS);
+        }
+
+        totalPages = Math.ceil(animeInstances.length / RESULTS_PER_PAGE);
+        displayPage(animeInstances, currentPage, totalPages); // Stay on the same page
+      } else {
+        console.log('\nNo more results available.');
+      }
+    }
   });
 };
 
@@ -55,6 +80,31 @@ const displayGenres = async () => {
     const genres = await fetchGenres();
     const genreNames = genres.map((genre) => genre.name).join(', ');
     console.log(`Available Genres: ${genreNames}`);
+  } catch (error) {
+    console.error(handleError(error));
+  }
+};
+
+// Display the current anime season, ordered by ranking
+const displayCurrentSeason = async () => {
+  try {
+    let animeInstances = await fetchCurrentSeason();
+    if (animeInstances.length === 0) {
+      throw new Error('No results found for the current season.');
+    }
+
+    // Enforce the hard limit of 81 results
+    if (animeInstances.length > MAX_RESULTS) {
+      animeInstances = animeInstances.slice(0, MAX_RESULTS);
+    }
+
+    const fetchMore = async (offset) => {
+      if (offset >= MAX_RESULTS) return [];
+      return await fetchCurrentSeason(offset);
+    };
+
+    const totalPages = Math.ceil(animeInstances.length / RESULTS_PER_PAGE);
+    setupKeyboardNavigation(animeInstances, totalPages, fetchMore);
   } catch (error) {
     console.error(handleError(error));
   }
@@ -93,6 +143,11 @@ const parseArgs = () => {
 
       // Adjust the index to account for the loop increment
       i -= 1;
+    } else if (args[i] === '--season') {
+      parsedArgs.season = true;
+    } else if (args[i] === '--name') {
+      parsedArgs.name = args.slice(i + 1).join(' ');
+      break; // Stop parsing after --name
     }
   }
 
@@ -103,6 +158,12 @@ const parseArgs = () => {
 export const handleCli = async () => {
   try {
     const args = parseArgs();
+
+    // Check if the user wants to display the current season
+    if (args.season) {
+      await displayCurrentSeason();
+      return; // Don't exit, let pagination handle it
+    }
 
     // Check if the user wants to display genres or search by genre
     if (args.genres) {
@@ -120,30 +181,49 @@ export const handleCli = async () => {
           return genre;
         });
 
-        const animeInstances = await searchAnimeByGenre(selectedGenres);
+        let animeInstances = await searchAnimeByGenre(selectedGenres);
         if (animeInstances.length === 0) {
           throw new Error(`No results found for the genre(s): ${args.genres.join('/')}.`);
         }
 
-        const totalPages = Math.ceil(animeInstances.length / RESULTS_PER_PAGE);
-        setupKeyboardNavigation(animeInstances, totalPages);
-      }
-      process.exit(0);
-    }
-    // Default: Search by query
-    else {
-      const query = process.argv.slice(2).join(' ');
-      if (!query) {
-        throw new Error('Usage: node index.js <anime-name>');
-      }
+        // Enforce the hard limit of 81 results
+        if (animeInstances.length > MAX_RESULTS) {
+          animeInstances = animeInstances.slice(0, MAX_RESULTS);
+        }
 
-      const animeInstances = await searchAnime(query);
+        const fetchMore = async (offset) => {
+          if (offset >= MAX_RESULTS) return [];
+          return await searchAnimeByGenre(selectedGenres, offset);
+        };
+
+        const totalPages = Math.ceil(animeInstances.length / RESULTS_PER_PAGE);
+        setupKeyboardNavigation(animeInstances, totalPages, fetchMore);
+      }
+      return; // Don't exit, let pagination handle it
+    }
+    // Check if the user wants to search by name
+    else if (args.name) {
+      let animeInstances = await searchAnime(args.name);
       if (animeInstances.length === 0) {
         throw new Error('No results found for the specified query.');
       }
 
+      // Enforce the hard limit of 81 results
+      if (animeInstances.length > MAX_RESULTS) {
+        animeInstances = animeInstances.slice(0, MAX_RESULTS);
+      }
+
+      const fetchMore = async (offset) => {
+        if (offset >= MAX_RESULTS) return [];
+        return await searchAnime(args.name, offset);
+      };
+
       const totalPages = Math.ceil(animeInstances.length / RESULTS_PER_PAGE);
-      setupKeyboardNavigation(animeInstances, totalPages);
+      setupKeyboardNavigation(animeInstances, totalPages, fetchMore);
+    }
+    // No valid flag provided
+    else {
+      throw new Error('Usage: node index.js --name <anime-name> or --genres <genre1/genre2> or --season');
     }
   } catch (error) {
     console.error(handleError(error));
