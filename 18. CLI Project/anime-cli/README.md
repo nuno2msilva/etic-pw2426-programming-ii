@@ -44,11 +44,11 @@ node index.js [name <anime> | genres <genre1/genre2> | season | watchlist | refr
 
 - **Search by name:**
   ```bash
-  node index.js name "Frieren"
+  node index.js name Frieren
   ```
 - **Search by genres:**
   ```bash
-  node index.js genres "Psychological/Horror"
+  node index.js genres Psychological/Horror
   ```
 - **List all genres:**
   ```bash
