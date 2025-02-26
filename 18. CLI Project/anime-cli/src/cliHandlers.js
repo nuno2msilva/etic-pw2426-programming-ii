@@ -1,6 +1,7 @@
 // cliHandlers.js
 import { searchAnime, searchAnimeByGenre, fetchGenres, fetchCurrentSeason } from './animeSearch.js';
 import { handleError } from './utils.js';
+import { addAnimeToWatchlist } from './watchlist.js';
 import readline from 'readline';
 
 // Constants
@@ -23,7 +24,7 @@ const displayPage = (animeInstances, page, totalPages) => {
 };
 
 // Display detailed anime information
-const displayAnimeInfo = (anime) => {
+const displayAnimeInfo = (anime, animeInstances, currentPage, totalPages) => {
   console.clear(); // Clear the console for a clean display
   console.log(`Name: ${anime.title}`);
   console.log(`Genres: ${anime.genres.join(', ')}`);
@@ -33,7 +34,27 @@ const displayAnimeInfo = (anime) => {
   console.log(`Broadcast Day: ${anime.broadcastDay}`);
   console.log(`Season: ${anime.season}`);
   console.log(`Studios: ${anime.studios.join(', ')}`);
-  console.log('\nPress any key to return to the list.');
+  console.log('\nAdd this anime to your watchlist? (y/n/q)');
+
+  // Set up keyboard input
+  readline.emitKeypressEvents(process.stdin);
+  process.stdin.setRawMode(true);
+
+  process.stdin.once('keypress', (str, key) => {
+    if (key.name === 'y') {
+      const message = addAnimeToWatchlist(anime); // Get the message from addAnimeToWatchlist
+      console.log(message); // Display the message
+      console.log('Returning to the list...');
+    } else if (key.name === 'n') {
+      console.log('Returning to the list...');
+    } else if (key.name === 'q') {
+      console.log('\nExiting...');
+      process.exit(0);
+    }
+
+    // Return to the list after handling the keypress
+    displayPage(animeInstances, currentPage, totalPages);
+  });
 };
 
 // Handle keyboard input for pagination and anime info
@@ -53,19 +74,26 @@ const setupKeyboardNavigation = (animeInstances, totalPages, fetchMore) => {
       process.exit(0);
     }
 
-    // Navigate pages
-    if (key.name === 'right' && currentPage < totalPages - 1) {
-      currentPage++;
-      displayPage(animeInstances, currentPage, totalPages);
+    // Navigate pages (only if there are multiple pages)
+    if (totalPages > 1) {
+      if (key.name === 'right' && currentPage < totalPages - 1) {
+        currentPage++;
+        displayPage(animeInstances, currentPage, totalPages);
+      }
+
+      if (key.name === 'left' && currentPage > 0) {
+        currentPage--;
+        displayPage(animeInstances, currentPage, totalPages);
+      }
     }
 
-    if (key.name === 'left' && currentPage > 0) {
-      currentPage--;
-      displayPage(animeInstances, currentPage, totalPages);
-    }
-
-    // Load more results if at the end of the current list
-    if (key.name === 'right' && currentPage === totalPages - 1 && fetchMore) {
+    // Load more results if at the end of the current list and there are 9 or more results
+    if (
+      key.name === 'right' &&
+      currentPage === totalPages - 1 &&
+      fetchMore &&
+      animeInstances.length >= RESULTS_PER_PAGE
+    ) {
       if (animeInstances.length >= MAX_RESULTS) {
         console.log('\nNo more results available.');
         return;
@@ -91,12 +119,7 @@ const setupKeyboardNavigation = (animeInstances, totalPages, fetchMore) => {
     if (key.name && /^[1-9]$/.test(key.name)) {
       const index = currentPage * RESULTS_PER_PAGE + (parseInt(key.name) - 1);
       if (index < animeInstances.length) {
-        displayAnimeInfo(animeInstances[index]);
-
-        // Wait for any key to return to the list
-        process.stdin.once('keypress', () => {
-          displayPage(animeInstances, currentPage, totalPages);
-        });
+        displayAnimeInfo(animeInstances[index], animeInstances, currentPage, totalPages);
       }
     }
   });

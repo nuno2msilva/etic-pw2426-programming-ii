@@ -1,6 +1,12 @@
+## 0.7.0 – Add Anime to Watchlist
+- Ability to create a watchlist file if it doesn’t exist;
+- Option to append selected anime details to the watchlist (in pretty print);
+- Fixed pagination misbehavior;
+
+
 ## See Anime Info [0.6.0]
 - Displays anime info when pressing the number in the keyboard corresponding to the number;
-- Beautified the numbers
+- Beautified the numbers;
 
 ## Search by Season [0.5.0]
 - Command to retrieve and display the current anime season;

@@ -6,11 +6,11 @@ export class Anime {
   constructor({ title, genres, episodes, status, duration, broadcastDay, season, studios }) {
     this.title = title;
     this.genres = genres;
-    this.episodes = episodes;
+    this.episodes = episodes || 'Unknown (Ongoing)'; // Handle null episodes
     this.status = status;
     this.duration = duration;
-    this.broadcastDay = broadcastDay;
-    this.season = season;
+    this.broadcastDay = broadcastDay || 'Unknown'; // Handle null broadcastDay
+    this.season = season || 'Unknown'; // Handle null season
     this.studios = studios;
   }
 }
@@ -27,11 +27,11 @@ export const searchAnime = async (query, offset = 0) => {
   return data.data.map((anime) => new Anime({
     title: anime.title,
     genres: anime.genres.map((genre) => genre.name),
-    episodes: anime.episodes,
+    episodes: anime.episodes || 'Unknown (Ongoing)', // Handle null episodes
     status: anime.status,
     duration: anime.duration,
-    broadcastDay: anime.broadcast?.day || 'Unknown',
-    season: `${anime.season} ${anime.year}`,
+    broadcastDay: anime.broadcast?.day || 'Unknown', // Handle null broadcastDay
+    season: anime.season && anime.year ? `${anime.season} ${anime.year}` : 'Unknown', // Handle null season
     studios: anime.studios.map((studio) => studio.name),
   }));
 };
@@ -49,11 +49,11 @@ export const searchAnimeByGenre = async (genres, offset = 0) => {
   return data.data.map((anime) => new Anime({
     title: anime.title,
     genres: anime.genres.map((genre) => genre.name),
-    episodes: anime.episodes,
+    episodes: anime.episodes || 'Unknown (Ongoing)', // Handle null episodes
     status: anime.status,
     duration: anime.duration,
-    broadcastDay: anime.broadcast?.day || 'Unknown',
-    season: `${anime.season} ${anime.year}`,
+    broadcastDay: anime.broadcast?.day || 'Unknown', // Handle null broadcastDay
+    season: anime.season && anime.year ? `${anime.season} ${anime.year}` : 'Unknown', // Handle null season
     studios: anime.studios.map((studio) => studio.name),
   }));
 };
@@ -80,11 +80,11 @@ export const fetchCurrentSeason = async (offset = 0) => {
   return data.data.map((anime) => new Anime({
     title: anime.title,
     genres: anime.genres.map((genre) => genre.name),
-    episodes: anime.episodes,
+    episodes: anime.episodes || 'Unknown (Ongoing)', // Handle null episodes
     status: anime.status,
     duration: anime.duration,
-    broadcastDay: anime.broadcast?.day || 'Unknown',
-    season: `${anime.season} ${anime.year}`,
+    broadcastDay: anime.broadcast?.day || 'Unknown', // Handle null broadcastDay
+    season: anime.season && anime.year ? `${anime.season} ${anime.year}` : 'Unknown', // Handle null season
     studios: anime.studios.map((studio) => studio.name),
   }));
 };
