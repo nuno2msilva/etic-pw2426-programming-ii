@@ -1,0 +1,12 @@
+{
+  "name": "streamer",
+  "version": "0.1.0",
+  "main": "index.js",
+  "author": "",
+  "license": "MIT",
+  "description": "",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js"
+  }
+}

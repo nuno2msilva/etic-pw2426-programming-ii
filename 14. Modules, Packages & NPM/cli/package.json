@@ -1,0 +1,21 @@
+{
+  "name": "cli",
+  "version": "0.1.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+    "start": "node src/index.js"
+  },
+  "type": "module",
+  "keywords": [
+    "cli",
+    "tool",
+    "demo"
+  ],
+  "author": "",
+  "license": "MIT",
+  "description": "",
+  "devDependencies": {
+    "jest": "^29.7.0"
+  }
+}

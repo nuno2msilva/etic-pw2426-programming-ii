@@ -1,0 +1,25 @@
+{
+  "name": "cli",
+  "version": "0.1.0",
+  "description": "My first CLI Tool",
+  "main": "source/index.js",
+  "scripts": {
+    "test": "jest",
+    "start": "node source/index.js"
+  },
+  "type": "module",
+  "keywords": [
+    "cli",
+    "tool",
+    "demo"
+  ],
+  "author": "Nuno Silva <nmsilva164@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "jest": "^29.7.0"
+  },
+  "dependencies": {
+    "chalk": "^5.4.1",
+    "winston": "^3.17.0"
+  }
+}

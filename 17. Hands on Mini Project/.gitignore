@@ -132,10 +132,3 @@ dist
 
 
 .solutions.md
-
-# project specific files
-node_modules/
-.DS_Store
-watchlist.json
-*.log
-LunarData.csv

@@ -1,0 +1,19 @@
+{
+  "name": "todo-list",
+  "version": "0.1.0",
+  "description": "CLI TODO App",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "CLI",
+    "TODO"
+  ],
+  "author": "Nuno Silva <nmsilva164@gmail.com>",
+  "license": "MIT",
+  "type":"module",
+  "dependencies": {
+    "winston": "^3.17.0"
+  }
+}
