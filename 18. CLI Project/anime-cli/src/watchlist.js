@@ -1,6 +1,6 @@
 // watchlist.js
 import fs from 'fs';
-import path from 'path';
+import { searchAnime } from './animeSearch.js';
 
 const WATCHLIST_FILE = 'watchlist.json';
 
@@ -46,4 +46,39 @@ const loadWatchlist = () => {
   }
 };
 
-export { initializeWatchlist, addAnimeToWatchlist, loadWatchlist };
+// Refresh anime data in the watchlist
+const refreshWatchlist = async () => {
+  const watchlist = loadWatchlist();
+  const updatedWatchlist = [];
+
+  for (const anime of watchlist) {
+    try {
+      const [latestAnime] = await searchAnime(anime.title); // Fetch latest data
+      if (latestAnime) {
+        updatedWatchlist.push(latestAnime); // Add updated anime data
+      } else {
+        updatedWatchlist.push(anime); // Keep old data if no update found
+      }
+    } catch (error) {
+      console.error(`Failed to update "${anime.title}": ${error.message}`);
+      updatedWatchlist.push(anime); // Keep old data if update fails
+    }
+  }
+
+  fs.writeFileSync(WATCHLIST_FILE, JSON.stringify(updatedWatchlist, null, 2));
+  return 'Watchlist refreshed successfully.';
+};
+
+// Remove an anime from the watchlist
+const removeAnimeFromWatchlist = (index) => {
+  const watchlist = loadWatchlist();
+  if (index < 0 || index >= watchlist.length) {
+    throw new Error('Invalid index. Anime not found in watchlist.');
+  }
+
+  const removedAnime = watchlist.splice(index, 1)[0]; // Remove anime at index
+  fs.writeFileSync(WATCHLIST_FILE, JSON.stringify(watchlist, null, 2));
+  return `Removed "${removedAnime.title}" from watchlist.`;
+};
+
+export { initializeWatchlist, addAnimeToWatchlist, loadWatchlist, refreshWatchlist, removeAnimeFromWatchlist };
