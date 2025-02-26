@@ -1,6 +1,6 @@
 {
   "name": "anime-cli",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A CLI tool to search for anime and manage a watchlist",
   "main": "bin/index.js",
   "bin": {
@@ -12,5 +12,8 @@
   },
   "type": "module",
   "author": "Nuno Silva <nmsilva164@gmail.com>",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "node-fetch": "^3.3.2"
+  }
 }
